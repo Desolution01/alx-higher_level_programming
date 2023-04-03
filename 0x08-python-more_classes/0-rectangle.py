@@ -1,11 +1,7 @@
 #!/usr/bin/python3
-"""
-This is for your readability. this  task tells us more about  a class - Rectangle
-"""
+"""A class that defines a rectangle"""
 
 
 class Rectangle:
-    """
-    This is an empty class
-    """
+    """An empty class that represents a rectangle"""
     pass
