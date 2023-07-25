@@ -1,26 +1,43 @@
 #!/usr/bin/node
 
 const request = require('request');
-const url = process.argv[2];
 
-request(url, function (err, response, body) {
-  if (err) {
-    console.log(err);
-  } else if (response.statusCode === 200) {
-    const completed = {};
-    const tasks = JSON.parse(body);
-    for (const i in tasks) {
-      const task = tasks[i];
-      if (task.completed === true) {
-        if (completed[task.userId] === undefined) {
-          completed[task.userId] = 1;
-        } else {
-          completed[task.userId]++;
-        }
+const fetchJSONData = (url) => {
+  return new Promise((resolve, reject) => {
+    request(url, { json: true }, (err, response, body) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(body);
       }
+    });
+  });
+};
+
+const countCompletedTasksByUser = (data) => {
+  const completedTasksByUser = {};
+
+  data.forEach((task) => {
+    if (task.completed) {
+      const userId = task.userId;
+      completedTasksByUser[userId] = (completedTasksByUser[userId] || 0) + 1;
     }
-    console.log(completed);
-  } else {
-    console.log('An error occured. Status code: ' + response.statusCode);
-  }
-});
+  });
+
+  return completedTasksByUser;
+};
+
+const apiURL = "https://jsonplaceholder.typicode.com/todos";
+
+fetchJSONData(apiURL)
+  .then((data) => {
+    const completedTasksByUser = countCompletedTasksByUser(data);
+    console.log("Users with completed tasks:");
+    for (const userId in completedTasksByUser) {
+      console.log(`User ID: ${userId}, Completed Tasks: ${completedTasksByUser[userId]}`);
+    }
+  })
+  .catch((err) => {
+    console.error("Error fetching data:", err);
+  });
+;
